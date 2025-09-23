@@ -12,7 +12,7 @@ public class Player : LivingMovableEntity
         Name = name;
     }
 
-    public Player(string name, Vector2 initialPosition, float speed = 3f, int maxHealth = 100)
+    public Player(string name, Vector2 initialPosition, float speed = 3f, float maxHealth = 100)
         : base(initialPosition, speed, maxHealth)
     {
         Name = name;
