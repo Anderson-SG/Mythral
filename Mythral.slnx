@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Mythral.Game/Mythral.Game.csproj" Id="1f68ece3-206b-4bd8-9b04-0fed6ae274de" />
+    <Project Path="src/Mythral.Server/Mythral.Server.csproj" Id="30749d04-5306-4dec-b3df-d6c6733cb4f1" />
+    <Project Path="src/Mythral.Shared/Mythral.Shared.csproj" Id="c3e74890-2909-4709-bdeb-47e6ad7ec057" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Mythral.Game.Tests/Mythral.Game.Tests.csproj" Id="40129897-f8d9-45c4-a65d-dfb89bdb0ca9" />
+    <Project Path="tests/Mythral.Server.Tests/Mythral.Server.Tests.csproj" Id="5c7bfd7c-3070-4d76-96cf-eec2c1d5e4ea" />
+    <Project Path="tests/Mythral.Shared.Tests/Mythral.Shared.Tests.csproj" Id="b3d6fa42-4a97-4f12-92eb-b57cf0b0be81" />
+  </Folder>
+</Solution>
