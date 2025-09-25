@@ -4,6 +4,10 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Mythral.Server.Infrastructure.Options;
 using Mythral.Server.Infrastructure.Database;
+using Mythral.Server.Application.GameLoop;
+using Mythral.Server.Application.Networking;
+using Mythral.Server.Domain.Game;
+using Mythral.Server.Domain.Networking;
 
 namespace Mythral.Server.Infrastructure.Extensions;
 
@@ -19,7 +23,6 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddAppDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        // Usa Options para obter valores tipados. A configuração já foi vinculada em AddAppOptions.
         services.AddDbContextPool<AppDbContext>((sp, options) =>
         {
             var database = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
@@ -32,9 +35,12 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    // Futuros agrupamentos (mantidos para clareza / expansão):
-    // public static IServiceCollection AddCore(this IServiceCollection services) { ... }
-    // public static IServiceCollection AddNetworking(this IServiceCollection services) { ... }
-    // public static IServiceCollection AddGameLoop(this IServiceCollection services) { ... }
-    // public static IServiceCollection AddPersistence(this IServiceCollection services) { ... }
+    public static IServiceCollection AddGameLoop(this IServiceCollection services)
+    {
+        services.AddSingleton<IGameWorld, GameWorld>();
+        services.AddSingleton<IUdpServer, UdpServerStub>();
+        services.AddSingleton<ITcpServer, TcpServerStub>();
+        services.AddHostedService<GameLoopService>();
+        return services;
+    }
 }

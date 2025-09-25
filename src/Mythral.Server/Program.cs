@@ -11,12 +11,12 @@ var host = Host.CreateDefaultBuilder(args)
         services
             .AddAppOptions(ctx.Configuration)
             .AddAppDatabase(ctx.Configuration)
-            .AddRedisCache(ctx.Configuration);
+            .AddRedisCache(ctx.Configuration)
+            .AddGameLoop();
 
         // Futuras separações:
         // .AddCore()
         // .AddNetworking()
-        // .AddGameLoop()
         // .AddPersistence()
     })
     .UseSerilog((context, services, configuration) => configuration
