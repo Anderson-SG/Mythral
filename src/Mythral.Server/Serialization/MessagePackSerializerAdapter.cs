@@ -11,6 +11,7 @@ internal sealed class MessagePackSerializerAdapter : IMessageSerializer
     }
 
     public byte[] Write<T>(T obj) => MessagePackSerializer.Serialize(obj);
+    public byte[] Write(Type type, object obj) => MessagePackSerializer.Serialize(type, obj);
 
     public T Read<T>(ReadOnlySpan<byte> buffer) => MessagePackSerializer.Deserialize<T>(new System.Buffers.ReadOnlySequence<byte>(buffer.ToArray()));
 
