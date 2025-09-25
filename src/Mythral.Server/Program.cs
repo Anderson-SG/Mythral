@@ -1,62 +1,41 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-
-
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Hosting;
 using Mythral.Server.Application.Utils;
-using Mythral.Server.Infrastructure.Options;
-using Mythral.Server.Infrastructure.Database;
 using Serilog;
+using Mythral.Server.Infrastructure.Extensions;
 
 ServerUtils.PrintServerLogo();
 
-await Host.CreateDefaultBuilder(args)
+var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((ctx, services) =>
     {
-        // Configuration bindings (appsettings.json / appsettings.{Environment}.json)
-        services.AddOptions();
-        services.Configure<DatabaseOptions>(ctx.Configuration.GetSection(DatabaseOptions.SectionName));
-        services.Configure<RedisOptions>(ctx.Configuration.GetSection(RedisOptions.SectionName));
+        services
+            .AddAppOptions(ctx.Configuration)
+            .AddAppDatabase(ctx.Configuration)
+            .AddRedisCache(ctx.Configuration);
 
-        // DbContext (PostgreSQL)
-        services.AddDbContextPool<AppDbContext>((sp, options) =>
-        {
-            var database = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-            var connectionString = $"Host={database.Host};Port={database.Port};Database={database.Database};Username={database.Username};Password={database.Password};";
-            options.UseNpgsql(connectionString, o =>
-            {
-                o.SetPostgresVersion(16, 0);
-            });
-        });
-
-        // // Core
-        // services.AddSingleton<ISessionRegistry, SessionRegistry>();
-        // services.AddSingleton<IGameWorld, GameWorld>(); // estado/mundo em memória
-        // services.AddSingleton<IClock, SystemClock>();
-
-        // // Networking
-        // services.AddSingleton<IUdpServer, LiteNetLibServer>();
-        // services.AddSingleton<ITcpServer, TcpNetCoreServer>();
-
-        // // Serialization
-        // services.AddSingleton<IMessageSerializer, MessagePackSerializerAdapter>();
-
-        // // Loop autoritativo (60 Hz)
-        // services.AddHostedService<GameLoopService>();
-        // services.AddHostedService<TcpHostedService>();
-        // services.AddHostedService<UdpHostedService>();
-
-        // // Persistência
-        // services.AddSingleton<IPlayerRepository, PlayerRepository>(); // Dapper/EF Core
+        // Futuras separações:
+        // .AddCore()
+        // .AddNetworking()
+        // .AddGameLoop()
+        // .AddPersistence()
     })
     .UseSerilog((context, services, configuration) => configuration
-                    .ReadFrom.Configuration(context.Configuration)
-                    .ReadFrom.Services(services)
-                    .Enrich.FromLogContext()
-                    .WriteTo.Console()
-                    .WriteTo.File("logs/mythral-.log", rollingInterval: RollingInterval.Day)
-                    )
-    .RunConsoleAsync();
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.File("logs/mythral-.log", rollingInterval: RollingInterval.Day)
+    )
+    .Build();
+
+try
+{
+    await host.Services.ApplyDatabaseMigrationsAsync();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Falha ao aplicar migrations.");
+    throw; // Fail fast se as migrations não puderem ser aplicadas
+}
+
+await host.RunAsync();
